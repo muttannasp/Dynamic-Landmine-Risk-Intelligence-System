@@ -1,15 +1,15 @@
 # app_streamlit.py
+from matplotlib import pyplot as plt
 import shap
 import streamlit as st
 import pandas as pd
 import geopandas as gpd
 import folium
+import numpy as np
 from folium.plugins import HeatMap
 from streamlit_folium import st_folium
 from model_and_utils import train_rf, predict_grid, incremental_update, explain_model_shap, save_model, load_model
 import os
-
-st.write("✅ App loaded successfully")
 
 st.set_page_config(layout="wide", page_title="Dynamic Landmine Risk Prototype")
 
@@ -20,6 +20,13 @@ def load_data():
     df = pd.read_csv(DATA_PATH)
     return df
 
+@st.cache_data
+def train_and_predict(df_data, retrain_key=None):
+    """Cache model training and predictions to prevent recomputation"""
+    model, metrics = train_rf(df_data)
+    df_pred = predict_grid(model, df_data)
+    return model, metrics, df_pred
+
 df = load_data()
 
 st.sidebar.title("Controls")
@@ -27,16 +34,20 @@ radius = st.sidebar.slider("Heatmap radius", min_value=8, max_value=30, value=16
 retrain_button = st.sidebar.button("Retrain model on current dataset")
 add_point = st.sidebar.checkbox("Add a labelled point (simulate field report)")
 
-# train initial model
-model, metrics = train_rf(df)
-st.sidebar.markdown(f"**Initial model AUC:** {metrics['auc']:.3f}  \n**Accuracy:** {metrics['accuracy']:.3f}")
+# Use session state to track retraining
+if 'retrain_counter' not in st.session_state:
+    st.session_state.retrain_counter = 0
+
+if retrain_button:
+    st.session_state.retrain_counter += 1
+
+# train model and get predictions (cached)
+model, metrics, df_pred = train_and_predict(df, st.session_state.retrain_counter)
+st.sidebar.markdown(f"**Model AUC:** {metrics['auc']:.3f}  \n**Accuracy:** {metrics['accuracy']:.3f}")
 
 # Main map
 st.title("Dynamic Landmine Risk Heatmap — Demo")
 st.markdown("This is a prototype: add labelled points to simulate field updates and retrain to see changes.")
-
-# Predict risk for all points
-df_pred = predict_grid(model, df)
 
 # Build folium map centered on mean coordinates
 mean_lat = df_pred["lat"].mean()
@@ -44,11 +55,33 @@ mean_lon = df_pred["lon"].mean()
 m = folium.Map(location=[mean_lat, mean_lon], zoom_start=12, tiles="CartoDB positron")
 
 # Add heatmap layer using predicted probabilities (weighted)
-heat_data = list(zip(df_pred["lat"], df_pred["lon"], df_pred["risk_proba"]))
-HeatMap(heat_data, radius=radius, blur=15, max_zoom=13).add_to(m)
+# Clean and round data to avoid folium overflow issues
+df_heat = df_pred.dropna(subset=["lat", "lon", "risk_proba"]).copy()
+df_heat = df_heat.astype({"lat": float, "lon": float, "risk_proba": float})
+df_heat["lat"] = df_heat["lat"].round(4)
+df_heat["lon"] = df_heat["lon"].round(4)
+df_heat["risk_proba"] = df_heat["risk_proba"].clip(0, 1)  # ensure valid range
 
-# Add sample markers (colored by label)
-for _, row in df_pred.sample(n=min(80, len(df_pred)), random_state=42).iterrows():
+# Use consistent sampling for stability
+np.random.seed(42)
+df_heat_sample = df_heat.sample(n=min(600, len(df_heat)), random_state=42)
+
+# Construct heatmap data
+heat_data = df_heat_sample[["lat", "lon", "risk_proba"]].values.tolist()
+
+# Add single heatmap layer with optimized parameters
+HeatMap(
+    heat_data,
+    radius=radius,
+    blur=25,
+    max_zoom=12,
+    min_opacity=0.4,
+    gradient={0.4: 'blue', 0.6: 'cyan', 0.7: 'lime', 0.8: 'yellow', 1.0: 'red'}
+).add_to(m)
+
+# Add sample markers (colored by label) with consistent sampling
+marker_sample = df_pred.sample(n=min(60, len(df_pred)), random_state=42)
+for _, row in marker_sample.iterrows():
     color = "red" if row["mine"]==1 else "green"
     folium.CircleMarker(location=[row["lat"], row["lon"]],
                         radius=3,
@@ -57,8 +90,8 @@ for _, row in df_pred.sample(n=min(80, len(df_pred)), random_state=42).iterrows(
                         fill_opacity=0.7,
                         popup=f"risk:{row['risk_proba']:.2f}, label:{row['mine']}").add_to(m)
 
-# Render folium map in streamlit
-st_data = st_folium(m, width=900, height=600)
+# Render folium map in streamlit with a key to prevent unnecessary re-renders
+st_data = st_folium(m, width=900, height=600, key=f"map_{st.session_state.retrain_counter}_{radius}")
 
 # Simulate adding a labeled point
 if add_point:
@@ -94,8 +127,7 @@ if retrain_button:
     df_current = pd.read_csv(DATA_PATH)
     model_new, metrics_new = train_rf(df_current)
     save_model(model_new, path="rf_model.joblib")
-    st.sidebar.markdown(f"**Retrained AUC:** {metrics_new['auc']:.3f}  \n**Accuracy:** {metrics_new['accuracy']:.3f}")
-    st.success("Model retrained on the current dataset. Refresh the page to see updated map.")
+    st.success("Model retrained on the current dataset. The map will update automatically.")
 
 # Provide ability to download current dataset
 st.sidebar.markdown("---")
@@ -106,9 +138,14 @@ st.sidebar.download_button("Download CSV", csv, "current_dataset.csv", "text/csv
 # Explainability
 if st.sidebar.checkbox("Show SHAP explanations (sample)"):
     st.write("Computing SHAP values (may take a few seconds)...")
-    sample = pd.read_csv(DATA_PATH).sample(n=min(200, len(df)))
+    sample = pd.read_csv(DATA_PATH).sample(n=min(200, len(df)), random_state=42)
+    # Use only feature columns to match SHAP shape (5 features)
+    feature_cols = ["vegetation", "soil_moisture", "distance_to_road", "conflict_intensity", "elevation"]
+    X_sample = sample[feature_cols]
     explainer, shap_values = explain_model_shap(model, sample)
-    st.write("SHAP summary (feature impact on model output):")
-    import matplotlib.pyplot as plt
-    fig = shap.plots.beeswarm(shap_values, show=False)
-    st.pyplot(bbox_inches="tight")
+
+    st.subheader("SHAP Feature Importance Summary")
+
+    fig, ax = plt.subplots()
+    shap.summary_plot(shap_values, X_sample, show=False, plot_size=(8, 5))
+    st.pyplot(fig)
