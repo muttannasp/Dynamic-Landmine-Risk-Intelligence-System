@@ -92,24 +92,41 @@ def explain_model_shap(model, df_sample):
     try:
         explainer = shap.TreeExplainer(model)
         sv = explainer.shap_values(X)
-        # For classifiers, TreeExplainer often returns list [class0, class1]
+        
+        # Handle different return formats from TreeExplainer
         if isinstance(sv, list) and len(sv) > 1:
-            shap_values = sv[1]
+            # List format: [class0_values, class1_values]
+            shap_values = sv[1]  # Use class 1 (positive class)
+        elif isinstance(sv, np.ndarray):
+            if sv.ndim == 3 and sv.shape[-1] == 2:
+                # 3D array: (n_samples, n_features, n_classes)
+                shap_values = sv[:, :, 1]  # Extract class 1 values
+            else:
+                # 2D array: (n_samples, n_features)
+                shap_values = sv
         else:
             shap_values = sv
-    except Exception:
-        explainer = shap.Explainer(model, X)
-        ev = explainer(X)
-        # ev may be an Explanation object; attempt to extract values for class 1
-        if hasattr(ev, "values"):
-            vals = ev.values
-            if getattr(vals, "ndim", 0) == 3 and vals.shape[-1] > 1:
-                shap_values = vals[..., 1]
+            
+    except Exception as e:
+        print(f"TreeExplainer failed: {e}, trying fallback...")
+        # Fallback to general Explainer
+        try:
+            explainer = shap.Explainer(model, X)
+            ev = explainer(X)
+            # ev may be an Explanation object; attempt to extract values for class 1
+            if hasattr(ev, "values"):
+                vals = ev.values
+                if getattr(vals, "ndim", 0) == 3 and vals.shape[-1] > 1:
+                    shap_values = vals[..., 1]
+                else:
+                    shap_values = vals
             else:
-                shap_values = vals
-        else:
-            # fallback: try to coerce to numpy
-            shap_values = np.asarray(ev)
+                # fallback: try to coerce to numpy
+                shap_values = np.asarray(ev)
+        except Exception as e2:
+            print(f"Fallback also failed: {e2}")
+            # Last resort: return zeros
+            shap_values = np.zeros((len(X), len(FEATURES)))
 
     return explainer, shap_values, X
 

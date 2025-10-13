@@ -10,19 +10,20 @@ import shap
 import os
 
 from model_and_utils import train_rf, predict_grid, incremental_update, explain_model_shap, save_model, load_model
+from simulate_data import generate_synthetic_geodata
 
 # -----------------------
 # Config
 # -----------------------
 st.set_page_config(layout="wide", page_title="Dynamic Landmine Risk Intelligence System")
-DATA_PATH = "synthetic_mine_data.csv"
 
 # -----------------------
 # Helpers (cached)
 # -----------------------
 @st.cache_data
 def load_data():
-    df = pd.read_csv(DATA_PATH)
+    """Generate synthetic data programmatically instead of loading from CSV"""
+    df = generate_synthetic_geodata(n_points=1200, seed=42)
     return df
 
 @st.cache_data
@@ -43,6 +44,14 @@ st.caption("Developed by **Krish Jani** — Graduate Research Prototype for Geos
 
 # Load dataset
 df = load_data()
+
+# Initialize session state for user-added data
+if "user_added_data" not in st.session_state:
+    st.session_state.user_added_data = pd.DataFrame()
+
+# Combine base data with user-added data
+if not st.session_state.user_added_data.empty:
+    df = pd.concat([df, st.session_state.user_added_data], ignore_index=True)
 
 # Sidebar controls
 st.sidebar.header("Controls")
@@ -147,9 +156,8 @@ if add_point:
                 "elevation": elevation,
                 "mine": label
             }])
-            new_df = pd.read_csv(DATA_PATH)
-            new_df = pd.concat([new_df, new_row], ignore_index=True)
-            new_df.to_csv(DATA_PATH, index=False)
+            # Add to session state instead of CSV file
+            st.session_state.user_added_data = pd.concat([st.session_state.user_added_data, new_row], ignore_index=True)
             st.success("Added point to dataset. Click 'Retrain model on current dataset' to update predictions.")
 
 # -----------------------
@@ -187,31 +195,31 @@ st.pyplot(fig2)
 if st.checkbox("Show SHAP explanations (sample)"):
     st.write("Computing SHAP values (this can take a few seconds)...")
     sample = df.sample(n=min(200, len(df)), random_state=42)
+    
     try:
         explainer, shap_values, X_sample = explain_model_shap(model, sample)
-        # shap_values: (n_samples, n_features)
-    except Exception:
-        # fallback: compute via TreeExplainer (best effort)
-        explainer = shap.TreeExplainer(model)
-        sv_list = explainer.shap_values(sample[["vegetation","soil_moisture","distance_to_road","conflict_intensity","elevation"]])
-        shap_values = sv_list[1] if isinstance(sv_list, list) and len(sv_list) > 1 else sv_list
-        X_sample = sample[["vegetation","soil_moisture","distance_to_road","conflict_intensity","elevation"]]
-
-    # Choose plot kind
-    plot_kind = st.radio("SHAP plot type", ["Summary (beeswarm)", "Bar"], index=0)
-    if plot_kind == "Bar":
-        fig3 = plt.figure(figsize=(8, 4))
-        shap.summary_plot(shap_values, X_sample, plot_type="bar", show=False)
-        st.pyplot(fig3)
-    else:
-        fig4 = plt.figure(figsize=(10, 5))
-        shap.summary_plot(shap_values, X_sample, show=False)
-        st.pyplot(fig4)
+        st.success(f"SHAP values computed successfully! Shape: {shap_values.shape}")
+        
+        # Choose plot kind
+        plot_kind = st.radio("SHAP plot type", ["Summary (beeswarm)", "Bar"], index=0)
+        
+        if plot_kind == "Bar":
+            fig3 = plt.figure(figsize=(8, 4))
+            shap.summary_plot(shap_values, X_sample, plot_type="bar", show=False)
+            st.pyplot(fig3)
+        else:
+            fig4 = plt.figure(figsize=(10, 5))
+            shap.summary_plot(shap_values, X_sample, show=False)
+            st.pyplot(fig4)
+            
+    except Exception as e:
+        st.error(f"SHAP computation failed: {str(e)}")
+        st.write("This might be due to insufficient data or model issues. Try retraining the model or adding more data points.")
 
 # -----------------------
 # Download CSV
 # -----------------------
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 📥 Download current dataset")
-csv = pd.read_csv(DATA_PATH).to_csv(index=False).encode("utf-8")
+csv = df.to_csv(index=False).encode("utf-8")
 st.sidebar.download_button("Download CSV", csv, "current_dataset.csv", "text/csv")
