@@ -139,13 +139,45 @@ st.sidebar.download_button("Download CSV", csv, "current_dataset.csv", "text/csv
 if st.sidebar.checkbox("Show SHAP explanations (sample)"):
     st.write("Computing SHAP values (may take a few seconds)...")
     sample = pd.read_csv(DATA_PATH).sample(n=min(200, len(df)), random_state=42)
-    # Use only feature columns to match SHAP shape (5 features)
     feature_cols = ["vegetation", "soil_moisture", "distance_to_road", "conflict_intensity", "elevation"]
     X_sample = sample[feature_cols]
-    explainer, shap_values = explain_model_shap(model, sample)
 
-    st.subheader("SHAP Feature Importance Summary")
+    # Use fast tree-specific explainer; compute class-1 SHAP values (not interactions)
+    try:
+        explainer = shap.TreeExplainer(model)
+        shap_values_list = explainer.shap_values(X_sample)
+        # shap_values_list can be a list [class0, class1] for classifiers
+        if isinstance(shap_values_list, list) and len(shap_values_list) > 1:
+            shap_values = shap_values_list[1]
+        else:
+            shap_values = shap_values_list
+    except Exception:
+        # Fallback to generic explainer
+        explainer, sv = explain_model_shap(model, sample)
+        # sv might be an Explanation object; convert to array for class-1 if present
+        try:
+            if hasattr(sv, "values") and getattr(sv.values, "ndim", 0) == 3 and sv.values.shape[-1] > 1:
+                shap_values = sv.values[..., 1]
+            else:
+                shap_values = sv.values if hasattr(sv, "values") else sv
+        except Exception:
+            shap_values = sv
 
-    fig, ax = plt.subplots()
-    shap.summary_plot(shap_values, X_sample, show=False, plot_size=(8, 5))
-    st.pyplot(fig)
+    st.subheader("SHAP Feature Importance")
+    # Controls for plot appearance
+    plot_kind = st.radio("Plot type", ["Bar", "Beeswarm"], index=0, horizontal=True)
+    max_display = st.slider("Max features", min_value=3, max_value=len(feature_cols), value=5)
+
+    # Create the plot with improved sizing and margins to prevent clipping
+    plt.close('all')
+    # Slightly larger default font for readability
+    plt.rcParams.update({"font.size": 11})
+    fig = plt.figure(figsize=(12, 7))
+    if plot_kind == "Bar":
+        shap.summary_plot(shap_values, X_sample, plot_type="bar", max_display=max_display, show=False, plot_size=(12, 7))
+    else:
+        shap.summary_plot(shap_values, X_sample, max_display=max_display, show=False, plot_size=(12, 7))
+    # Adjust margins to avoid cutting labels
+    plt.subplots_adjust(left=0.22, right=0.98, bottom=0.18, top=0.93)
+    # Tight bounding box + container width to avoid overflow/cropping
+    st.pyplot(plt.gcf(), clear_figure=True, bbox_inches='tight', pad_inches=0.2, use_container_width=True)
