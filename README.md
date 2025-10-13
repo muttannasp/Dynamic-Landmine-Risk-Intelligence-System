@@ -8,16 +8,18 @@
 
 ## 📋 Table of Contents
 
-- [Overview](#overview)
-- [Technical Architecture](#technical-architecture)
-- [Features](#features)
-- [Methodology](#methodology)
-- [Installation & Setup](#installation--setup)
-- [Usage](#usage)
-- [Model Performance](#model-performance)
-- [API Reference](#api-reference)
-- [Contributing](#contributing)
-- [License](#license)
+- [🎯 Overview](#-overview)
+- [🏗️ Technical Architecture](#️-technical-architecture)
+- [✨ Features](#-features)
+- [🔬 Methodology](#-methodology)
+- [🚀 Installation & Setup](#-installation--setup)
+- [💻 Usage](#-usage)
+- [📈 Model Performance](#-model-performance)
+- [📚 API Reference](#-api-reference)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
+- [🙏 Acknowledgments](#-acknowledgments)
+- [📞 Contact](#-contact)
 
 ## 🎯 Overview
 
@@ -69,22 +71,22 @@ The **Dynamic Landmine Risk Intelligence System** is an advanced geospatial mach
 ┌─────────────────────────────────────────────────────────────┐
 │                    Streamlit Web Interface                  │
 ├─────────────────────────────────────────────────────────────┤
-│  • Interactive Controls  • Real-time Visualization         │
-│  • Model Management     • Data Input/Export                │
+│  • Interactive Controls  • Real-time Visualization          │
+│  • Model Management      • Data Input/Export                │
 └─────────────────────────────────────────────────────────────┘
                               │
 ┌─────────────────────────────────────────────────────────────┐
 │                 Machine Learning Pipeline                   │
 ├─────────────────────────────────────────────────────────────┤
-│  • Random Forest Classifier  • Feature Engineering         │
-│  • Cross-validation         • Model Persistence            │
+│  • Random Forest Classifier  • Feature Engineering          │
+│  • Cross-validation          • Model Persistence            │
 └─────────────────────────────────────────────────────────────┘
                               │
 ┌─────────────────────────────────────────────────────────────┐
 │                Geospatial Data Processing                   │
 ├─────────────────────────────────────────────────────────────┤
 │  • Synthetic Data Generation  • Coordinate Transformation   │
-│  • Feature Extraction        • Spatial Interpolation       │
+│  • Feature Extraction         • Spatial Interpolation       │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -286,9 +288,6 @@ explainer, shap_values, X_sample = explain_model_shap(model, df.sample(100))
 ![Feature Importance](docs/screenshots/feature-importance.png)
 *Bar chart displaying the relative importance of each geospatial feature in the model*
 
-#### Cross-Validation Results
-![Cross Validation](docs/screenshots/cross-validation.png)
-*Box plot showing the consistency of model performance across different data folds*
 
 ### Feature Importance Rankings
 
@@ -401,6 +400,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Contact
 
 **Developer**: Krish Jani  
+**Email**: kj2743@nyu.edu
 **Project**: Dynamic Landmine Risk Intelligence System  
 **Live Demo**: [https://dynamic-landmine-risk-heatmap.streamlit.app/](https://dynamic-landmine-risk-heatmap.streamlit.app/)
 
