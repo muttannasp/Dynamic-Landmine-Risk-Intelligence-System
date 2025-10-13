@@ -19,18 +19,21 @@ def generate_synthetic_geodata(n_points=800, seed=42, bbox=(-76.8, 3.3, -76.0, 4
     conflict_intensity = np.random.choice([0,1,2,3], size=n_points, p=[0.6, 0.2, 0.15, 0.05])
     elevation = np.random.normal(loc=1200, scale=150, size=n_points)  # meters
 
-    # create an underlying risk function (nonlinear)
+    # create a much stronger underlying risk function (more realistic)
     risk_score = (
-        2.5 * vegetation +
-        1.8 * soil_moisture +
-        -0.6 * np.log1p(distance_to_road) +
-        0.9 * (conflict_intensity / 3.0) +
-        0.001 * (elevation - 1200)
+        6.0 * vegetation +                    # Strong vegetation signal
+        5.0 * soil_moisture +                 # Strong soil moisture signal
+        -2.0 * np.log1p(distance_to_road) +   # Strong distance signal
+        3.0 * (conflict_intensity / 3.0) +    # Strong conflict signal
+        0.003 * (elevation - 1200) +          # Moderate elevation signal
+        # Add some interaction effects
+        2.0 * vegetation * soil_moisture +    # Vegetation + moisture interaction
+        -1.0 * vegetation * np.log1p(distance_to_road)  # Vegetation + distance interaction
     )
 
-    # convert to probability with sigmoid and add noise
-    prob = 1 / (1 + np.exp(- (risk_score - 1.2)))
-    prob = 0.65 * prob + 0.1 * np.random.rand(n_points)  # add randomness
+    # convert to probability with sigmoid and minimal noise
+    prob = 1 / (1 + np.exp(- (risk_score - 1.0)))  # Adjusted threshold
+    prob = 0.95 * prob + 0.02 * np.random.rand(n_points)  # Minimal randomness
 
     labels = (np.random.rand(n_points) < prob).astype(int)
 
