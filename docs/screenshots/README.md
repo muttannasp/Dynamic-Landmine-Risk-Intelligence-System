@@ -39,12 +39,6 @@ To complete the README documentation, please add the following screenshots:
   1. Focus on the "Top feature importances (Random Forest)" section
   2. Capture the horizontal bar chart
 
-### 6. Cross-Validation Results (`cross-validation.png`)
-- **What to capture**: Any cross-validation visualization (if available)
-- **How to capture**:
-  1. Look for CV results in the model summary
-  2. Capture any performance consistency visualizations
-
 ## Screenshot Guidelines
 
 - **Resolution**: Use high-resolution screenshots (at least 1920x1080)
